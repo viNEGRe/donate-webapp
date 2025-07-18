@@ -6,40 +6,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #ffffff;
-      padding: 2em;
-      text-align: center;
-      color: #333;
-    }
-    h1 {
-      font-size: 1.6em;
-      margin-bottom: 1em;
-    }
-    p {
-      margin-bottom: 2em;
-    }
-    .info {
-      font-size: 0.9em;
-      color: #777;
-    }
+    body { font-family: sans-serif; text-align: center; padding: 2em; }
+    input { font-size: 1.2em; width: 80%; margin: 1em 0; }
+    button { padding: 10px 20px; font-size: 1.1em; }
   </style>
 </head>
 <body>
-  <h1>Спасибо за поддержку 🙏</h1>
-  <p>Нажмите кнопку ниже, чтобы отправить 10 звёзд автору проекта.</p>
-  <p class="info">Telegram откроет окно оплаты Stars.</p>
+  <h1>Сколько звёзд вы хотите отправить?</h1>
+  <input type="number" id="starsInput" min="1" placeholder="Например: 10">
+  <br>
+  <button onclick="sendStars()">🚀 Отправить</button>
 
   <script>
     Telegram.WebApp.ready();
 
-    Telegram.WebApp.MainButton.setText("🚀 Отправить 10 звёзд");
-    Telegram.WebApp.MainButton.show();
+    async function sendStars() {
+      const stars = parseInt(document.getElementById("starsInput").value);
 
-    Telegram.WebApp.MainButton.onClick(() => {
-      Telegram.WebApp.sendData("donate_10_stars");  // Отправка события боту
-    });
+      if (isNaN(stars) || stars < 1) {
+        alert("Введите корректное количество звёзд");
+        return;
+      }
+
+      const balance = await Telegram.WebApp.getUserStarsBalance();
+
+      if (balance === undefined) {
+        alert("Ошибка: не удалось получить баланс звёзд.");
+        return;
+      }
+
+      if (balance < stars) {
+        Telegram.WebApp.openTelegramStarsPurchase();
+        return;
+      }
+
+      const confirmed = confirm(`Вы уверены, что хотите отправить ${stars} звёзд?`);
+      if (!confirmed) return;
+
+      Telegram.WebApp.sendData(JSON.stringify({ stars }));
+      Telegram.WebApp.close();
+    }
   </script>
 </body>
 </html>

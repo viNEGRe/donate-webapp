@@ -13,16 +13,13 @@
       text-align: center;
       color: #333;
     }
-
     h1 {
       font-size: 1.6em;
       margin-bottom: 1em;
     }
-
     p {
       margin-bottom: 2em;
     }
-
     .info {
       font-size: 0.9em;
       color: #777;
@@ -31,8 +28,8 @@
 </head>
 <body>
   <h1>Спасибо за поддержку 🙏</h1>
-  <p>Нажмите на кнопку ниже, чтобы отправить 10 звёзд автору проекта.</p>
-  <p class="info">Telegram покажет окно оплаты Stars.</p>
+  <p>Нажмите кнопку ниже, чтобы отправить 10 звёзд автору проекта.</p>
+  <p class="info">Telegram откроет окно оплаты Stars.</p>
 
   <script>
     Telegram.WebApp.ready();
@@ -40,11 +37,8 @@
     Telegram.WebApp.MainButton.setText("🚀 Отправить 10 звёзд");
     Telegram.WebApp.MainButton.show();
 
-    Telegram.WebApp.MainButton.onClick(function () {
-      Telegram.WebApp.requestStarsPayment({
-        amount: 10,
-        description: "Поддержка проекта"
-      });
+    Telegram.WebApp.MainButton.onClick(() => {
+      Telegram.WebApp.sendData("donate_10_stars");  // Отправка события боту
     });
   </script>
 </body>

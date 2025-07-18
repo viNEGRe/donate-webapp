@@ -6,13 +6,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2em; }
-    input { font-size: 1.2em; width: 80%; margin: 1em 0; }
-    button { padding: 10px 20px; font-size: 1.1em; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+      background-color: #f5f5f5;
+    }
+    input {
+      font-size: 1.2em;
+      width: 80%;
+      padding: 10px;
+      margin: 1em 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.1em;
+      background-color: #3faeec;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+    #balance {
+      font-size: 1em;
+      margin-bottom: 1em;
+      color: #555;
+    }
   </style>
 </head>
 <body>
   <h1>Сколько звёзд вы хотите отправить?</h1>
+  <div id="balance">Загрузка баланса...</div>
   <input type="number" id="starsInput" min="1" placeholder="Например: 10">
   <br>
   <button onclick="sendStars()">🚀 Отправить</button>
@@ -20,30 +43,40 @@
   <script>
     Telegram.WebApp.ready();
 
-    async function sendStars() {
-      const stars = parseInt(document.getElementById("starsInput").value);
+    const stars = Telegram.WebApp.initDataUnsafe?.stars;
 
-      if (isNaN(stars) || stars < 1) {
+    if (stars === undefined) {
+      document.getElementById("balance").innerText =
+        "⚠️ Невозможно получить звёзды. Убедитесь, что вы используете Telegram Business Bot и открыли WebApp из Telegram.";
+    } else {
+      document.getElementById("balance").innerText = `Ваш баланс: ${stars} звёзд`;
+    }
+
+    function sendStars() {
+      const amount = parseInt(document.getElementById("starsInput").value);
+
+      if (isNaN(amount) || amount < 1) {
         alert("Введите корректное количество звёзд");
         return;
       }
 
-      const balance = await Telegram.WebApp.getUserStarsBalance();
-
-      if (balance === undefined) {
-        alert("Ошибка: не удалось получить баланс звёзд.");
+      if (stars === undefined) {
+        alert("Невозможно получить ваш баланс. Попробуйте позже.");
         return;
       }
 
-      if (balance < stars) {
-        Telegram.WebApp.openTelegramStarsPurchase();
+      if (amount > stars) {
+        const goBuy = confirm("У вас недостаточно звёзд. Хотите купить?");
+        if (goBuy) {
+          Telegram.WebApp.openTelegramStarsPurchase();
+        }
         return;
       }
 
-      const confirmed = confirm(`Вы уверены, что хотите отправить ${stars} звёзд?`);
-      if (!confirmed) return;
+      const confirmSend = confirm(`Вы действительно хотите отправить ${amount} звёзд?`);
+      if (!confirmSend) return;
 
-      Telegram.WebApp.sendData(JSON.stringify({ stars }));
+      Telegram.WebApp.sendData(JSON.stringify({ stars: amount }));
       Telegram.WebApp.close();
     }
   </script>
